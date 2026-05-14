@@ -67,23 +67,6 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 8px -1px rgba(5, 150, 105, 0.3);
         }
-        
-        /* 삭제 버튼 스타일 */
-        .btn-delete {
-            background: #fee2e2;
-            color: #ef4444;
-            border: 1px solid #fecaca;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-delete:hover {
-            background: #ef4444;
-            color: white;
-        }
     </style>
 </head>
 <body>
@@ -328,7 +311,6 @@
                 headers.forEach(h => { 
                     headRow += `<th>${h || '-'}</th>`; 
                 });
-                headRow += '<th>관리</th>';
                 headRow += '</tr>';
                 thead.innerHTML = headRow;
 
@@ -339,25 +321,10 @@
                     for (let j = 0; j < headers.length; j++) {
                         tr += `<td>${row[j] || ''}</td>`;
                     }
-                    // 서버 요청 없이 화면과 로컬 데이터에서만 삭제하는 버튼
-                    tr += `<td><button class="btn-delete" onclick="removeRowLocally(${i}, '${row[1] || ''}')">화면에서 삭제</button></td>`;
                     tr += '</tr>';
                     tbody.innerHTML += tr;
                 }
             }
-
-            // [화면에서 삭제] 기능 구현 (서버 요청 없음)
-            window.removeRowLocally = function(index, name) {
-                if (!confirm(`[${name}] 지원자를 현재 화면에서 제외하시겠습니까?\n(원본 구글 시트 데이터는 보존되며, 현재 상태로 엑셀 다운로드 시에도 제외됩니다.)`)) {
-                    return;
-                }
-
-                // 1. 로컬 메모리 배열(globalData)에서 해당 행 삭제
-                globalData.splice(index, 1);
-
-                // 2. 변경된 데이터로 표 다시 그리기 (엑셀 다운로드 데이터와 동기화됨)
-                renderTable(globalData);
-            };
 
             // 3. 엑셀 파일로 다운로드 (SheetJS 사용)
             downloadExcelBtn.addEventListener('click', () => {
