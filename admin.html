@@ -236,7 +236,36 @@
                             return;
                         }
                         
-                        globalData = res.data; // 서버로부터 받아온 데이터 배열 할당
+                        // 데이터 한글 변환 및 형식화 처리
+                        globalData = res.data.map(row => row.map(cell => {
+                            // 1. 단순 텍스트 매핑 (자격구분, 예/아니오 등)
+                            const mapping = {
+                                'academic': '학계',
+                                'field': '현장 경력자',
+                                'public': '공무원 등',
+                                'Public': '공무원 등',
+                                'yes': '예',
+                                'no': '아니오',
+                                'on': '체크'
+                            };
+                            
+                            let val = mapping[cell] || cell;
+                            
+                            // 2. 날짜 형식 변환 (ISO string인 경우 yyyy-mm-dd로)
+                            if (val && typeof val === 'string' && val.length > 10 && !isNaN(Date.parse(val)) && (val.includes('T') || val.includes('Z'))) {
+                                try {
+                                    const d = new Date(val);
+                                    const year = d.getFullYear();
+                                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                                    const day = String(d.getDate()).padStart(2, '0');
+                                    return `${year}-${month}-${day}`;
+                                } catch(e) {
+                                    return val;
+                                }
+                            }
+                            
+                            return val;
+                        }));
                         renderTable(globalData); // 화면 표출
                         
                         // 화면 전환 (로그인 숨기고 데이터 창 표시)
