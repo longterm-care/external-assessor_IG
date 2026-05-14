@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.style.cursor = 'pointer';
         item.addEventListener('click', () => {
             const targetStep = parseInt(item.dataset.step);
-            if (currentStep === 9) return; // Disable clicking after submission
+            if (currentStep === 9 || targetStep === 9) return; // Disable clicking after submission or skipping to step 9 directly
             
             if (targetStep < currentStep) {
                 currentStep = targetStep;
