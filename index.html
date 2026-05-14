@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2027년 외부평가자 선발 시스템</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Landing Page -->
+        <div id="landingPage" class="form-step active" data-step="0">
+            <div class="glass-card" style="text-align: center; padding: 5rem 3rem;">
+                <div style="margin-bottom: 2rem; color: var(--primary);">
+                    <i data-lucide="shield-check" style="width: 64px; height: 64px;"></i>
+                </div>
+                <h1 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 1.5rem; color: var(--text-title); line-height: 1.3;">
+                    2027년 인천경기지역본부<br>장기요양기관 외부평가자 선발
+                </h1>
+                <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 3.5rem;">
+                    전문성과 공정성을 갖춘 최고의 평가자를 기다립니다.
+                </p>
+                <button type="button" class="btn btn-primary" id="startApp" style="max-width: 300px; padding: 1.5rem 3rem; font-size: 1.25rem; border-radius: 50px;">
+                    지원서 작성하기 <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <header id="mainHeader" style="display: none;">
+            <h1>장기요양기관 외부평가자 선발</h1>
+            <p>2027년 인천경기지역본부 외부평가자 모집</p>
+        </header>
+
+        <!-- Stepper -->
+        <div class="stepper" id="mainStepper" style="display: none; margin-bottom: 4rem;">
+            <div class="step-item active" data-step="1"><div class="step-dot">1</div><div class="step-label">자격기준</div></div>
+            <div class="step-item" data-step="2"><div class="step-dot">2</div><div class="step-label">인적사항 및 소속</div></div>
+            <div class="step-item" data-step="3"><div class="step-dot">3</div><div class="step-label">학력 및 자격</div></div>
+            <div class="step-item" data-step="4"><div class="step-dot">4</div><div class="step-label">근무경력</div></div>
+            <div class="step-item" data-step="5"><div class="step-dot">5</div><div class="step-label">연구실적/경력</div></div>
+            <div class="step-item" data-step="6"><div class="step-dot">6</div><div class="step-label">평가수행</div></div>
+            <div class="step-item" data-step="7"><div class="step-dot">7</div><div class="step-label">개인정보동의</div></div>
+            <div class="step-item" data-step="8"><div class="step-dot">8</div><div class="step-label">최종제출</div></div>
+            <div class="step-item" data-step="9"><div class="step-dot">9</div><div class="step-label">제출완료</div></div>
+        </div>
+
+        <form id="applicationForm" style="display: none;">
+            <!-- Step 1: 자격기준 -->
+            <div class="form-step" data-step="1">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="award"></i> 자격기준</h2>
+                    <label class="required" style="margin-bottom: 2rem; display: block; font-size: 1.1rem;">해당하는 자격기준을 하나만 선택해 주십시오.</label>
+                    
+                    <div class="qualification-options">
+                        <div class="qual-card">
+                            <label class="checkbox-item" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                                <input type="radio" name="qualification" value="academic" required> 학계
+                            </label>
+                            <div class="qual-desc">
+                                ① 보건·복지·의료 관련학과* 박사 또는 석사 학위 소지자로, 대학·전문대학·산업대학에서 전임 또는 비전임 교원으로 재직 중인 자<br>
+                                ② 전임 및 비전임교원 퇴직자(재직기간 10년 이상)로 2027년 1월 1일 기준 퇴직 후 5년이 경과되지 아니한 자<br>
+                                <span class="note">* 관련학과: 사회복지, 노인복지, 장애·재활 분야, 간호 분야 등</span>
+                            </div>
+                        </div>
+
+                        <div class="qual-card">
+                            <label class="checkbox-item" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                                <input type="radio" name="qualification" value="field" required> 현장 경력자
+                            </label>
+                            <div class="qual-desc">
+                                보건·복지·의료 관련 현장경력 5년 이상인 자(시설장, 사무국장, 급여제공직종*)<br>
+                                다만, 퇴직자는 2027년 1월 1일 기준 퇴직 후 5년이 경과하지 아니한 자<br>
+                                <span class="note">* 급여제공직종: 사회복지사, 간호(조무)사, 물리(작업)치료사, 요양보호사</span>
+                            </div>
+                        </div>
+
+                        <div class="qual-card">
+                            <label class="checkbox-item" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                                <input type="radio" name="qualification" value="public" required> 공무원 등
+                            </label>
+                            <div class="qual-desc">
+                                보건·복지·의료 관련 공무원 등* 퇴직자 중 2027년 1월 1일 기준 퇴직 후 5년이 경과하지 아니하고 관련 자격(면허)증**을 소지한자<br>
+                                <span class="note">* 공무원 등: 공무원, 공공기관 등(국민건강보험공단 등)<br>** 관련자격(면허)증: 사회복지사, 간호(조무)사, 물리(작업)치료사, 요양보호사</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 2: 인적 사항 및 소속 -->
+            <div class="form-step" data-step="2">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="user"></i> 인적 사항 및 소속</h2>
+                    <div class="address-row" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="required">성명</label>
+                            <input type="text" name="name" required placeholder="성명을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label class="required">성별</label>
+                            <div class="checkbox-group" style="padding-top: 0.8rem;">
+                                <label class="checkbox-item"><input type="radio" name="gender" value="남" required> 남</label>
+                                <label class="checkbox-item"><input type="radio" name="gender" value="여" required> 여</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="address-row" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="required">생년월일</label>
+                            <input type="date" name="birthdate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>연령 (만 세)</label>
+                            <input type="number" name="age" readonly placeholder="자동 계산됩니다">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">주민등록지 주소</label>
+                        <div class="address-row" style="gap: 0.75rem;">
+                            <input type="text" name="addr_reg_city" placeholder="시/군/구 (예: 경기도 수원시 팔달구)" required>
+                            <input type="text" name="addr_reg_detail" placeholder="상세주소 입력" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">실거주지 주소</label>
+                        <div class="address-row" style="gap: 0.75rem;">
+                            <input type="text" name="addr_actual_city" placeholder="시/군/구 (예: 경기도 수원시 팔달구)" required>
+                            <input type="text" name="addr_actual_detail" placeholder="상세주소 입력" required>
+                        </div>
+                    </div>
+                    <div class="address-row">
+                        <div class="form-group">
+                            <label class="required">전화번호</label>
+                            <input type="tel" name="phone" required placeholder="010-0000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label class="required">이메일</label>
+                            <input type="email" name="email" required placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1.1rem; color: var(--primary); margin: 2rem 0 1.5rem; padding-top: 2rem; border-top: 1px dashed var(--border);">[소속 정보 - 선택사항]</h3>
+                    <div class="address-row">
+                        <div class="form-group">
+                            <label>근무처</label>
+                            <input type="text" name="workplace" placeholder="근무처 입력">
+                        </div>
+                        <div class="form-group">
+                            <label>직위</label>
+                            <input type="text" name="work_position" placeholder="직위 입력">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>주소 (근무처)</label>
+                        <input type="text" name="work_addr" placeholder="근무처 전체 주소를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label>전화 (근무처)</label>
+                        <input type="text" name="work_phone" placeholder="근무처 전화번호 입력">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 3: 최종 학력 및 자격 ・면허 사항 -->
+            <div class="form-step" data-step="3">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="book-open"></i> 최종 학력 및 자격 ・면허 사항</h2>
+                    <div class="form-group">
+                        <label id="majorLabel">전공 <span class="sub-label">최종학력은 지원서 구분에 학계만 작성합니다.</span></label>
+                        <input type="text" name="major" id="majorInput" placeholder="전공을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label>자격‧면허증 <span class="sub-label">해당하는 자격‧면허증에 한하여 작성합니다.</span></label>
+                        <textarea name="licenses" rows="5" placeholder="예) 간호사 면허증, 사회복지사 1급, 요양보호사 자격증"></textarea>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 4: 근무경력 -->
+            <div class="form-step" data-step="4">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="briefcase"></i> 근무경력</h2>
+                    <p class="sub-label" style="margin-bottom: 2rem;">모집공고문의 응시자격 및 우대사항에 해당하는 경력사항만 작성합니다.</p>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th width="30%">기관명</th>
+                                    <th>직위 및 직종</th>
+                                    <th width="35%">재직기간</th>
+                                    <th width="15%">비고</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" name="exp_org_1" placeholder="기관명"></td>
+                                    <td><input type="text" name="exp_pos_1" placeholder="직위"></td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="month" name="exp_start_1" style="flex: 1;"> ~ <input type="month" name="exp_end_1" style="flex: 1;">
+                                        </div>
+                                    </td>
+                                    <td><input type="text" name="exp_note_1" placeholder="비고"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" name="exp_org_2"></td>
+                                    <td><input type="text" name="exp_pos_2"></td>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="exp_start_2" style="flex: 1;"> ~ <input type="month" name="exp_end_2" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="exp_note_2"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" name="exp_org_3"></td>
+                                    <td><input type="text" name="exp_pos_3"></td>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="exp_start_3" style="flex: 1;"> ~ <input type="month" name="exp_end_3" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="exp_note_3"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" name="exp_org_4"></td>
+                                    <td><input type="text" name="exp_pos_4"></td>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="exp_start_4" style="flex: 1;"> ~ <input type="month" name="exp_end_4" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="exp_note_4"></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" name="exp_org_5"></td>
+                                    <td><input type="text" name="exp_pos_5"></td>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="exp_start_5" style="flex: 1;"> ~ <input type="month" name="exp_end_5" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="exp_note_5"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="sub-label" style="margin-top: 1.5rem; color: var(--text-muted); line-height: 1.6;">
+                        ※(비고란 기재방법) 학계는 전공분야, 장기요양기관 운영‧종사 경력자는 해당 기관이 받은 평가등급, 공무원 등은 담당업무를 기재합니다.
+                    </p>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 5: 연구 실적, 타 시설평가 또는 장기요양기관 근무 경력직 등 -->
+            <div class="form-step" data-step="5">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="file-text"></i> 연구실적, 타 시설평가 또는 장기요양기관 근무 경력직</h2>
+                    <p class="sub-label" style="margin-bottom: 2rem;">모집공고문의 응시자격 및 우대사항에 해당하는 경력사항만 작성합니다.</p>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th width="45%">기간</th>
+                                    <th>내용</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="res_start_1" style="flex: 1;"> ~ <input type="month" name="res_end_1" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="res_content_1" placeholder="주요 내용 입력"></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="res_start_2" style="flex: 1;"> ~ <input type="month" name="res_end_2" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="res_content_2"></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="res_start_3" style="flex: 1;"> ~ <input type="month" name="res_end_3" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="res_content_3"></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="display: flex; align-items: center; gap: 5px;"><input type="month" name="res_start_4" style="flex: 1;"> ~ <input type="month" name="res_end_4" style="flex: 1;"></div></td>
+                                    <td><input type="text" name="res_content_4"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 6: 평가수행 관련 사항 -->
+            <div class="form-step" data-step="6">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="check-circle"></i> 평가수행 관련 사항</h2>
+                    <div class="form-group">
+                        <label class="required">평가가능횟수 (주)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="radio" name="eval_freq" value="1" required> 주 1회</label>
+                            <label class="checkbox-item"><input type="radio" name="eval_freq" value="2" required> 주 2회</label>
+                            <label class="checkbox-item"><input type="radio" name="eval_freq" value="3" required> 주 3회</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">운전수행 가능여부</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="radio" name="driving" value="yes" required> 가능</label>
+                            <label class="checkbox-item"><input type="radio" name="driving" value="no" required> 불가능</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">거주지 외 타 시·도(시군구) 수행가능여부</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="radio" name="other_region" value="yes" required> 가능</label>
+                            <label class="checkbox-item"><input type="radio" name="other_region" value="no" required> 불가능</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">지원동기 및 포부 <span class="sub-label">최소 10자 이상 입력해 주십시오.</span></label>
+                        <textarea name="self_intro" rows="8" placeholder="지원 동기 및 관련 직무 역량을 상세히 기술해 주십시오." required minlength="10"></textarea>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 7: 개인정보 수집 및 이용 동의서 -->
+            <div class="form-step" data-step="7">
+                <div class="glass-card">
+                    <h2 class="section-title"><i data-lucide="shield-check"></i> 개인정보 수집 및 이용 동의서</h2>
+                    <div style="background: var(--secondary); padding: 2rem; border-radius: 12px; font-size: 0.9rem; color: var(--text-main); margin-bottom: 2rem; border: 1px solid var(--border); line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                        <p style="margin-bottom: 1rem;">국민건강보험공단(이하 “공단”이라 한다)은 장기요양기관 평가업무 수행과 관련하여 장기요양기관 외부평가자 모집을 위해 아래와 같이 개인정보를 수집·이용하고자 합니다.</p>
+                        
+                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">1. 개인정보 수집·이용 내역</h4>
+                        <table style="font-size: 0.85rem; margin-bottom: 1rem;">
+                            <tr><th width="30%">수집항목</th><td>성명, 성별, 생년월일, 연락처, 주소(직장,자택), 교육사항, 자격사항, 경험 혹은 경력사항</td></tr>
+                            <tr><th>수집 및 이용목적</th><td>
+                                - 제공하신 정보는 서류전형 등 위촉 관련 정보 제공, 지원자 사후 관리 등에 사용합니다.<br>
+                                - 본인 확인에 이용: 성명(한글), 생년월일<br>
+                                - 위촉 중 연락을 위한 정보: 성명(한글), 주소(직장,자택), 연락처<br>
+                                - 전형별 지원자 평가 이용: 자격사항, 경험 혹은 경력사항, 교육사항<br>
+                                - 우대를 위해 이용: 경험 혹은 경력사항
+                            </td></tr>
+                            <tr><th>보유 및 이용기간</th><td><strong>선발 평가 종료 시</strong></td></tr>
+                        </table>
+                        <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">※ 위의 개인정보 수집·이용에 대한 동의를 거부할 권리가 있습니다.</p>
+
+                        <div style="background: white; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid var(--border);">
+                            <p style="margin-bottom: 1rem; font-weight: 700;" class="required">☞ 위와 같이 개인정보를 수집·이용하는데 동의하십니까?</p>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item"><input type="radio" name="consent_1" value="yes" required> 동의합니다.</label>
+                                <label class="checkbox-item"><input type="radio" name="consent_1" value="no" required> 동의하지 않습니다.</label>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">2. 고유식별정보 처리 동의</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid var(--border);">
+                            <p style="margin-bottom: 1rem;" class="required">본인은 공단이 본인 개인정보의 수집‧이용‧제공을 위하여 「개인정보 보호법」 제24조제1항에 따른 본인의 고유식별정보를 처리하는 것에 동의하십니까?</p>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item"><input type="radio" name="consent_2" value="yes" required> 동의합니다.</label>
+                                <label class="checkbox-item"><input type="radio" name="consent_2" value="no" required> 동의하지 않습니다.</label>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">3. 동의 거부 권리 및 불이익 안내 확인</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 6px; border: 1px solid var(--border);">
+                            <p style="margin-bottom: 1rem;" class="required">본인은 제1호부터 제3호까지와 관련하여 본인 개인정보의 수집‧이용‧제공 및 고유식별정보의 처리에 동의하지 않을 수 있으며, 부동의(不同意) 시 선발이 어려울 수 있음을 확인하셨습니까?</p>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item"><input type="radio" name="consent_3" value="yes" required> 확인했습니다.</label>
+                                <label class="checkbox-item"><input type="radio" name="consent_3" value="no" required> 확인하지 못했습니다.</label>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; margin-top: 2rem; font-weight: 700; font-size: 1.1rem;">국민건강보험공단 이사장 귀하</p>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="button" class="btn btn-primary next-step">다음 단계 <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 8: 서약 및 최종제출 (New Position) -->
+            <div class="form-step" data-step="8">
+                <div class="glass-card" style="text-align: center;">
+                    <h2 class="section-title" style="justify-content: center;"><i data-lucide="send"></i> 서약 및 최종제출</h2>
+                    
+                    <!-- Info Verification Summary -->
+                    <div style="text-align: left; background: #f8fafc; padding: 1.5rem; border-radius: 8px; margin-bottom: 2.5rem; border: 1px solid var(--border);">
+                        <h4 style="color: var(--primary); margin-bottom: 1rem; font-weight: 800; font-size: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">기입 정보 확인</h4>
+                        <div id="infoSummary" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 0.75rem; font-size: 0.95rem; color: var(--text-main);">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <p style="font-size: 1.25rem; font-weight: 700; margin: 3rem 0; color: var(--text-title);">위의 기재사항이 사실과 다름없음을 확인하며,<br>외부평가자 지원서를 제출합니다.</p>
+
+                    <div style="text-align: left; background: var(--secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; font-size: 0.95rem; border: 1px solid var(--border);">
+                        <h4 style="color: #c00; margin-bottom: 1rem; font-weight: 800;">결격대상 <span class="required"></span></h4>
+                        <ul style="list-style: none; color: var(--text-main); line-height: 1.8; font-weight: 700;">
+                            <li>- 장기요양기관 협회 및 장기요양기관(동일법인 사회복지시설 포함)에 종사하고 있는 자 또는 직계가족이 장기요양기관을 운영 또는 종사하는 자</li>
+                            <li>- 노인일자리 사업 중 장기요양기관 현장에서 활동하는 자</li>
+                            <li>- 국가공무원법 제33조(결격사유)에 해당하는 자</li>
+                        </ul>
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border); text-align: center;">
+                            <p style="color: var(--text-title); font-weight: 800; margin-bottom: 0.75rem;">결격대상을 확인하셨습니까? <span class="required"></span></p>
+                            <label class="checkbox-item" style="font-weight: 700; justify-content: center;">
+                                <input type="checkbox" name="disqualification_check" required> 네 확인했으며, 결격 대상이 아닙니다.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="max-width: 450px; margin: 0 auto; text-align: left; padding: 2rem; background: var(--bg); border-radius: 8px;">
+                        <div class="form-group">
+                            <label>지원일자</label>
+                            <input type="text" id="displayDate" readonly style="background: white; text-align: center; font-weight: 700; border: none; font-size: 1.1rem;">
+                        </div>
+                        <div class="form-group">
+                            <label class="required">지원자 전자서명</label>
+                            <div class="signature-pad-container">
+                                <canvas id="signature-pad"></canvas>
+                            </div>
+                            <div style="text-align: right; margin-top: 1rem;">
+                                <button type="button" class="btn btn-outline" id="clearSignature" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: var(--text-muted); color: var(--text-muted);">서명 지우기</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-outline prev-step">이전</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">최종 지원서 제출</button>
+                </div>
+            </div>
+
+            <!-- Step 9: 제출완료 및 안내 (Old Step 8 position) -->
+            <div class="form-step" data-step="9">
+                <div class="glass-card">
+                    <div style="text-align: center; margin-bottom: 2rem; padding: 1rem 0;">
+                        <div style="color: #059669; margin-bottom: 1rem;">
+                            <i data-lucide="check-circle-2" style="width: 48px; height: 48px;"></i>
+                        </div>
+                        <h2 style="font-size: 1.75rem; font-weight: 900; color: var(--text-title); margin-bottom: 0.75rem;">지원해주셔서 감사합니다.</h2>
+                        <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 0.5rem;">지원서 접수가 완료되었습니다.</p>
+                        <p style="color: #c00; font-weight: 400; font-size: 1.1rem; line-height: 1.5;">
+                            아래 증빙서류까지 제출하셔야 '최종 접수'가 완료됩니다.<br>
+                            ※ 증빙서류 미제출 시 선정 대상에서 제외될 수 있으니 반드시 발송해 주세요.
+                        </p>
+                    </div>
+
+                    <h3 class="section-title"><i data-lucide="paperclip"></i> 제출 서류 안내</h3>
+                    <div style="padding: 2.5rem; background: #fff; border: 2px solid var(--secondary); border-radius: 12px;">
+                        <div style="color: #c00; border-left: 4px solid #c00; padding-left: 1.5rem; margin-bottom: 2.5rem;">
+                            <p style="margin-bottom: 0.75rem; font-weight: 800; font-size: 1.1rem;">아래 서류는 본 시스템에 업로드하지 않으며, 이메일로 별도 제출해주시기 바랍니다.</p>
+                            <ul style="list-style: none; font-size: 0.95rem; font-weight: 600; line-height: 1.7;">
+                                <li>* 본 메일은 수신 확인 시 시스템상 '읽지 않음'으로 나타날 수 있습니다.<br>
+                                    <span style="padding-left: 1.2rem; display: block;">누락 없는 증빙자료 접수를 위해, 메일 확인 후 순차적으로 접수 확인 회신을 드릴 예정입니다.</span></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="address-row" style="margin-bottom: 2rem;">
+                            <div>
+                                <h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-title);">[필수 공통 서류]</h4>
+                                <ul style="list-style: none; font-size: 0.9rem; color: var(--text-main);">
+                                    <li>- 건강보험 자격득실확인서 1부</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-title);">[해당자에 한해]</h4>
+                                <ul style="list-style: none; font-size: 0.9rem; color: var(--text-main); line-height: 1.6;">
+                                    <li>- 재직·경력증명서 1부</li>
+                                    <li>- 자격(면허)증 사본 1부</li>
+                                    <li>- 학위증명서 사본 1부</li>
+                                    <li>- 타 시설평가 경력사항 1부(위촉장 등 증빙서류)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 0.9rem; color: #c00; font-weight: 700; margin-bottom: 2rem; text-align: center; background: #fff1f2; padding: 10px; border-radius: 6px;">
+                            ※ 마감일시 (2026년 10월 31일 18시) 이후 제출된 서류는 접수 처리하지 않음.
+                        </p>
+                        
+                        <div style="background: var(--bg); padding: 1.5rem; border-radius: 6px; text-align: center;">
+                            <p style="margin-bottom: 0.5rem;"><strong>제출 이메일:</strong> <span style="color: var(--primary); font-size: 1.1rem;">0230970@nhis.or.kr</span></p>
+                            <p><strong>메일 제목:</strong> 인천경기지역본부 외부평가자 지원자 김건강</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button type="button" class="btn btn-outline" onclick="location.reload()" style="max-width: 200px;">홈으로 돌아가기</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
