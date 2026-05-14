@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - Google Antigravity 채용</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { background: #f1f5f9; }
+        .login-container { max-width: 450px; margin: 6rem auto; }
+        .data-container { max-width: 1400px; margin: 2rem auto; display: none; }
+        .otp-section { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border); }
+        .table-wrapper { 
+            overflow-x: auto; 
+            margin-top: 1rem; 
+            max-height: 70vh;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border); text-align: center; white-space: nowrap; }
+        th { 
+            background: var(--bg); 
+            color: var(--primary); 
+            font-weight: 700; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10;
+            box-shadow: 0 1px 0 var(--border);
+        }
+        td { font-size: 0.9rem; color: var(--text-main); }
+        tbody tr:hover { background-color: #f8fafc; }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* 엑셀 다운로드 버튼 스타일링 강화 */
+        .btn-excel {
+            background: #059669; 
+            color: white; 
+            padding: 0.8rem 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);
+        }
+        .btn-excel:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(5, 150, 105, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. 보안 로그인 화면 (초기 상태) -->
+    <div class="container login-container" id="loginScreen">
+        <div class="glass-card" style="text-align: center; padding: 3rem 2.5rem;">
+            <div style="color: var(--primary); margin-bottom: 1.5rem;">
+                <i data-lucide="shield-check" style="width: 56px; height: 56px;"></i>
+            </div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-title); margin-bottom: 0.5rem;">관리자 안전 로그인</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem;">보안을 위해 이메일 OTP 인증이 필요합니다.</p>
+
+            <form id="loginForm" style="text-align: left;">
+                <div class="form-group">
+                    <label>관리자 비밀번호</label>
+                    <input type="password" id="adminPwd" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <!-- 인증번호 발송 버튼 -->
+                <button type="button" class="btn btn-primary" id="requestOtpBtn" style="width: 100%; padding: 1rem;">
+                    <span>인증번호 발송</span>
+                </button>
+
+                <!-- 2. OTP 인증 영역 (초기엔 숨김) -->
+                <div class="otp-section" id="otpSection">
+                    <div class="form-group">
+                        <label>인증번호 (6자리)</label>
+                        <input type="text" id="adminOtp" placeholder="메일로 전송된 6자리 숫자" maxlength="6" style="letter-spacing: 2px; text-align: center; font-size: 1.1rem; font-weight: 700;">
+                    </div>
+                    <!-- 로그인 및 데이터 확인 버튼 -->
+                    <button type="submit" class="btn btn-primary" id="verifyOtpBtn" style="width: 100%; padding: 1rem; background: #059669; border-color: #059669;">
+                        <span>로그인 및 데이터 확인</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. 데이터 조회 및 엑셀 다운로드 화면 -->
+    <div class="container data-container" id="dataScreen">
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div style="text-align: left;">
+                <h1 style="color: var(--primary); font-size: 2rem; font-weight: 900; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="database" style="width: 32px; height: 32px;"></i> 통합 지원자 관리
+                </h1>
+                <p style="margin-top: 0.5rem; color: var(--text-muted);">안전하게 인증되었습니다. 접수된 모든 데이터를 조회합니다.</p>
+            </div>
+            <div>
+                <!-- 엑셀 다운로드 버튼 -->
+                <button class="btn-excel" id="downloadExcelBtn">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i>엑셀 파일로 다운로드
+                </button>
+            </div>
+        </header>
+
+        <div class="glass-card" style="padding: 1.5rem;">
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead id="dataHead">
+                        <!-- Header 렌더링 영역 -->
+                    </thead>
+                    <tbody id="dataBody">
+                        <!-- Data 렌더링 영역 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5dZOqXyKkZBv6FDXCmWMxGku3IZLmzki-PVT1ySIpxaz13MI2_wNm0K2F0U8JiFOP/exec";
+
+            const loginScreen = document.getElementById('loginScreen');
+            const dataScreen = document.getElementById('dataScreen');
+            const otpSection = document.getElementById('otpSection');
+            
+            const adminPwd = document.getElementById('adminPwd');
+            const adminOtp = document.getElementById('adminOtp');
+            
+            const requestOtpBtn = document.getElementById('requestOtpBtn');
+            const loginForm = document.getElementById('loginForm');
+            const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+
+            let globalData = [];
+
+            // 구글 웹 앱과 통신 (POST, JSON)
+            async function postToGAS(payload) {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(payload)
+                    });
+                    return await response.json();
+                } catch (err) {
+                    console.error("Fetch 에러:", err);
+                    throw err;
+                }
+            }
+
+            // 로딩 상태 처리 함수
+            function setBtnLoading(btn, isLoading, originalText) {
+                if (isLoading) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<div class="spinner"></div>';
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
+
+            // 1. 인증번호 발송 요청 (비밀번호 전송)
+            requestOtpBtn.addEventListener('click', async () => {
+                const pwd = adminPwd.value.trim();
+                if (!pwd) {
+                    alert("비밀번호를 입력해주세요.");
+                    adminPwd.focus();
+                    return;
+                }
+
+                setBtnLoading(requestOtpBtn, true, "");
+                try {
+                    const payload = { action: "requestOTP", password: pwd };
+                    const res = await postToGAS(payload);
+                    
+                    // 성공 처리 (success 또는 status 속성 확인)
+                    if (res.success || res.status === 'success') {
+                        alert("인증번호가 메일로 발송되었습니다. 확인 후 입력해주세요.");
+                        otpSection.style.display = "block";
+                        adminPwd.readOnly = true;
+                        requestOtpBtn.style.display = "none";
+                        adminOtp.focus();
+                    } else {
+                        alert("오류 발생: " + (res.message || "비밀번호가 올바르지 않습니다."));
+                    }
+                } catch (error) {
+                    alert("서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                } finally {
+                    if (requestOtpBtn.style.display !== "none") {
+                        setBtnLoading(requestOtpBtn, false, "<span>인증번호 발송</span>");
+                    }
+                }
+            });
+
+            // 2. 인증번호 확인 및 데이터 조회 (OTP 전송)
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const otp = adminOtp.value.trim();
+                if (!otp || otp.length !== 6) {
+                    alert("6자리 인증번호를 정확히 입력해주세요.");
+                    adminOtp.focus();
+                    return;
+                }
+
+                const verifyBtn = document.getElementById('verifyOtpBtn');
+                setBtnLoading(verifyBtn, true, "");
+                
+                try {
+                    const payload = { action: "verifyOTPAndFetch", otp: otp };
+                    const res = await postToGAS(payload);
+                    
+                    if (res.success || res.status === 'success') {
+                        if (!res.data || !Array.isArray(res.data) || res.data.length === 0) {
+                            alert("구글 시트에 등록된 데이터가 없습니다.");
+                            return;
+                        }
+                        
+                        globalData = res.data; // 서버로부터 받아온 데이터 배열 할당
+                        renderTable(globalData); // 화면 표출
+                        
+                        // 화면 전환 (로그인 숨기고 데이터 창 표시)
+                        loginScreen.style.display = "none";
+                        dataScreen.style.display = "block";
+                    } else {
+                        alert("인증 실패: " + (res.message || "잘못된 인증번호이거나 만료되었습니다."));
+                        adminOtp.value = '';
+                        adminOtp.focus();
+                    }
+                } catch (error) {
+                    alert("서버와 통신 중 오류가 발생했습니다.");
+                } finally {
+                    setBtnLoading(verifyBtn, false, "<span>로그인 및 데이터 확인</span>");
+                }
+            });
+
+            // 받아온 데이터를 깔끔한 표(Table)로 렌더링
+            function renderTable(dataArray) {
+                const thead = document.getElementById('dataHead');
+                const tbody = document.getElementById('dataBody');
+                
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                // 배열의 첫 번째 요소는 제목행(Header)
+                const headers = dataArray[0];
+                let headRow = '<tr>';
+                headers.forEach(h => { 
+                    headRow += `<th>${h || '-'}</th>`; 
+                });
+                headRow += '</tr>';
+                thead.innerHTML = headRow;
+
+                // 두 번째 요소부터 실제 데이터
+                for (let i = 1; i < dataArray.length; i++) {
+                    const row = dataArray[i];
+                    let tr = '<tr>';
+                    // Header의 길이만큼 칸(td)을 생성
+                    for (let j = 0; j < headers.length; j++) {
+                        tr += `<td>${row[j] || ''}</td>`;
+                    }
+                    tr += '</tr>';
+                    tbody.innerHTML += tr;
+                }
+            }
+
+            // 3. 엑셀 파일로 다운로드 (SheetJS 사용)
+            downloadExcelBtn.addEventListener('click', () => {
+                if (!globalData || globalData.length === 0) {
+                    alert("다운로드할 데이터가 없습니다.");
+                    return;
+                }
+
+                // 배열(Array of Arrays) 형태의 데이터를 SheetJS 워크시트로 변환
+                const worksheet = XLSX.utils.aoa_to_sheet(globalData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "지원자 전체 데이터");
+                
+                // 지정된 파일명으로 즉시 다운로드 실행
+                XLSX.writeFile(workbook, "antigravity_applicants.xlsx");
+            });
+        });
+    </script>
+</body>
+</html>

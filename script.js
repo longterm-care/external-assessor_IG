@@ -233,12 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const finalCheck = document.querySelector('input[name="final_confirm_check"]');
-        if (finalCheck && !finalCheck.checked) {
-            alert('최종 정보 확인 사항에 동의해 주세요.');
-            return;
-        }
-
         if (signaturePad.isEmpty()) {
             alert('전자서명을 완료해 주세요.');
             return;
@@ -255,7 +249,32 @@ document.addEventListener('DOMContentLoaded', () => {
         data.submittedAt = new Date().toLocaleString();
         data.signature = signaturePad.toDataURL();
 
-        // Save to LocalStorage
+        // 1. 화면에 있는 문항들의 답변을 순서대로 배열로 만들기
+        // FormData.values()를 사용하면 form 안에 있는 모든 전송 가능한 input/textarea 값들을 순서대로 가져옵니다.
+        const answers = Array.from(formData.values());
+
+        // 2. 구글 웹 앱으로 전송할 JSON 데이터 구성
+        const payload = {
+            action: "submitApplication",
+            answers: answers
+        };
+
+        // fetch를 이용한 POST 전송 (CORS 이슈 방지를 위해 text/plain 방식 사용)
+        fetch("https://script.google.com/macros/s/AKfycbw5dZOqXyKkZBv6FDXCmWMxGku3IZLmzki-PVT1ySIpxaz13MI2_wNm0K2F0U8JiFOP/exec", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            console.log('구글 웹 앱으로 전송 완료:', response);
+        })
+        .catch(error => {
+            console.error('구글 웹 앱 전송 중 오류 발생:', error);
+        });
+
+        // Save to LocalStorage (기존 로직 유지)
         const existing = JSON.parse(localStorage.getItem('recruitment_submissions') || '[]');
         existing.push(data);
         localStorage.setItem('recruitment_submissions', JSON.stringify(existing));
