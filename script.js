@@ -87,12 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.toggle('completed', stepNum < currentStep);
         });
 
-        // Step 3 Dynamic Validation Logic
         if (currentStep === 3) {
             const qualification = document.querySelector('input[name="qualification"]:checked')?.value;
             const majorLabel = document.getElementById('majorLabel');
             const majorInput = document.getElementById('majorInput');
-            
             if (qualification === 'academic') {
                 majorLabel.classList.add('required');
                 majorInput.required = true;
@@ -102,15 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Summary and Signature Pad logic for Step 8
         if (currentStep === 8) {
             updateInfoSummary();
             setTimeout(resizeCanvas, 100);
         }
 
-        // Final Step UI (Post-submission)
         if (currentStep === 9) {
-            mainStepper.style.display = 'none'; // Hide stepper on completion page
+            mainStepper.style.display = 'none';
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -161,8 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.style.cursor = 'pointer';
         item.addEventListener('click', () => {
             const targetStep = parseInt(item.dataset.step);
-            if (currentStep === 9) return; // Disable clicking after submission
-            
+            if (currentStep === 9) return;
             if (targetStep < currentStep) {
                 currentStep = targetStep;
                 updateSteps();
@@ -226,64 +221,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form Submission
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
+        // 결격대상 확인 체크박스 검사
         const disqCheck = document.querySelector('input[name="disqualification_check"]');
         if (disqCheck && !disqCheck.checked) {
             alert('결격대상 확인 항목에 동의해 주세요.');
             return;
         }
 
+        // 전자서명 검사
         if (signaturePad.isEmpty()) {
             alert('전자서명을 완료해 주세요.');
             return;
         }
 
-        // Final validation check to be extra sure
-        if (!validateStep(currentStep)) {
-            alert('필수 항목을 모두 입력해 주세요.');
-            return;
-        }
-
+        // 데이터 수집
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         data.submittedAt = new Date().toLocaleString();
         data.signature = signaturePad.toDataURL();
 
-        // 1. 화면에 있는 문항들의 답변을 순서대로 배열로 만들기
-        // FormData.values()를 사용하면 form 안에 있는 모든 전송 가능한 input/textarea 값들을 순서대로 가져옵니다.
+        // 구글 웹 앱으로 전송할 답변 배열
         const answers = Array.from(formData.values());
-
-        // 2. 구글 웹 앱으로 전송할 JSON 데이터 구성
         const payload = {
             action: "submitApplication",
             answers: answers
         };
 
-        // fetch를 이용한 POST 전송 (CORS 이슈 방지를 위해 text/plain 방식 사용)
+        // 구글 웹 앱으로 POST 전송
         fetch("https://script.google.com/macros/s/AKfycbw5dZOqXyKkZBv6FDXCmWMxGku3IZLmzki-PVT1ySIpxaz13MI2_wNm0K2F0U8JiFOP/exec", {
             method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         })
-        .then(response => {
-            console.log('구글 웹 앱으로 전송 완료:', response);
-        })
-        .catch(error => {
-            console.error('구글 웹 앱 전송 중 오류 발생:', error);
-        });
+        .then(response => { console.log('구글 웹 앱으로 전송 완료:', response); })
+        .catch(error => { console.error('구글 웹 앱 전송 중 오류 발생:', error); });
 
-        // Save to LocalStorage (기존 로직 유지)
-        const existing = JSON.parse(localStorage.getItem('recruitment_submissions') || '[]');
-        existing.push(data);
-        localStorage.setItem('recruitment_submissions', JSON.stringify(existing));
+        // LocalStorage에 저장
+        try {
+            const existing = JSON.parse(localStorage.getItem('recruitment_submissions') || '[]');
+            existing.push(data);
+            localStorage.setItem('recruitment_submissions', JSON.stringify(existing));
+        } catch (e) {
+            console.warn('LocalStorage 저장 실패:', e);
+        }
 
-        // Move to the final instruction step (Step 9)
+        // Step 9(제출완료)로 이동
         currentStep = 9;
         updateSteps();
-        
-        // Final thank you icon rendering
         lucide.createIcons();
     });
 });
