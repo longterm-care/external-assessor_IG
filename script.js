@@ -250,8 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
         data.signature = signaturePad.toDataURL();
 
         // 1. 화면에 있는 문항들의 답변을 순서대로 배열로 만들기
-        // FormData.values()를 사용하면 form 안에 있는 모든 전송 가능한 input/textarea 값들을 순서대로 가져옵니다.
         const answers = Array.from(formData.values());
+        
+        // 서명 데이터(Base64)를 배열 마지막에 추가
+        const signatureData = signaturePad.toDataURL();
+        answers.push(signatureData);
 
         // 2. 구글 웹 앱으로 전송할 JSON 데이터 구성
         const payload = {
