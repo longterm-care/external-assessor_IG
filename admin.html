@@ -343,7 +343,8 @@
                         
                         // 데이터가 이미지(서명)인 경우 처리
                         if (typeof cellValue === 'string' && cellValue.startsWith('data:image/')) {
-                            tr += `<td><img src="${cellValue}" style="max-height: 35px; border: 1px solid #e2e8f0; border-radius: 4px; background: #fff; cursor: zoom-in;" onclick="showImageFull('${cellValue}')" title="클릭하여 크게 보기"></td>`;
+                            // onclick에 문자열 대신 this.src를 사용하여 매우 긴 데이터를 안전하게 전달
+                            tr += `<td><img src="${cellValue}" style="max-height: 35px; border: 1px solid #e2e8f0; border-radius: 4px; background: #fff; cursor: zoom-in;" onclick="showImageFull(this.src)" title="클릭하여 크게 보기"></td>`;
                         } else {
                             tr += `<td>${cellValue}</td>`;
                         }
@@ -361,99 +362,133 @@
                 const headers = globalData[0];
                 const row = globalData[index];
                 
-                // 데이터 매핑용 객체 생성
-                const data = {};
-                headers.forEach((h, i) => { data[h] = row[i]; });
+                // 안전하게 값을 가져오는 함수
+                const v = (idx) => (row[idx] !== undefined && row[idx] !== null) ? row[idx] : '';
+                const vDate = (startIdx, endIdx) => (v(startIdx) && v(endIdx)) ? `${v(startIdx)} ~ ${v(endIdx)}` : '';
+
+                // 실제 지원 일자 추출
+                let submitDate = '2026년 10월 31일';
+                if (row[0]) {
+                    const rawDate = row[0];
+                    const d = new Date(rawDate);
+                    if (!isNaN(d.getTime())) {
+                        submitDate = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+                    } else if (typeof rawDate === 'string') {
+                        const match = rawDate.match(/(\d{4})[-./년]\s*(\d{1,2})[-./월]\s*(\d{1,2})/);
+                        if (match) submitDate = `${match[1]}년 ${parseInt(match[2])}월 ${parseInt(match[3])}일`;
+                    }
+                }
+
+                // 서명 데이터 찾기
+                let signatureData = '';
+                for (let i = row.length - 1; i >= 0; i--) {
+                    if (typeof row[i] === 'string' && row[i].startsWith('data:image/')) {
+                        signatureData = row[i];
+                        break;
+                    }
+                }
+
+                const signatureHtml = signatureData 
+                    ? '<img src="' + signatureData + '" class="signature-img">'
+                    : '<span style="display:inline-block; margin-left:15px; color:#94a3b8; font-size:12px;">(기존 데이터: 서명 없음)</span>';
 
                 const printWin = window.open('', '_blank');
                 
-                const html = `
-                <html>
-                <head>
-                    <title>${data['성명'] || '지원자'}_지원서_출력</title>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-                        body { font-family: 'Noto+Sans+KR', sans-serif; line-height: 1.6; color: #333; padding: 20px; }
-                        .page { width: 210mm; min-height: 297mm; padding: 20px; margin: 0 auto; background: white; box-sizing: border-box; position: relative; }
-                        .page-break { page-break-after: always; }
-                        h1 { text-align: center; font-size: 24px; text-decoration: underline; margin-bottom: 30px; }
-                        h2 { font-size: 18px; border-left: 5px solid #333; padding-left: 10px; margin-top: 30px; margin-bottom: 15px; background: #f8fafc; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { border: 1px solid #333; padding: 10px; font-size: 13px; }
-                        th { background: #f1f5f9; width: 20%; text-align: center; }
-                        .signature-area { text-align: right; margin-top: 50px; font-size: 16px; }
-                        .signature-img { max-height: 80px; vertical-align: middle; }
-                        .consent-box { border: 1px solid #333; padding: 15px; font-size: 12px; height: 400px; overflow-y: hidden; line-height: 1.8; }
-                        @media print {
-                            body { padding: 0; background: none; }
-                            .page { width: 100%; margin: 0; border: none; }
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <!-- Page 1: 지원서 메인 -->
-                    <div class="page page-break">
-                        <h1>장기요양기관 외부평가자 지원서</h1>
-                        <h2>1. 인적 사항</h2>
-                        <table>
-                            <tr><th>지원자격</th><td colspan="3">${data['지원자격'] || data['qualification'] || '-'}</td></tr>
-                            <tr><th>성 명</th><td>${data['성명'] || data['name'] || '-'}</td><th>성 별</th><td>${data['성별'] || data['gender'] || '-'}</td></tr>
-                            <tr><th>생년월일</th><td>${data['생년월일'] || data['birthdate'] || '-'}</td><th>연 령</th><td>만 ${data['연령'] || data['age'] || '-'}세</td></tr>
-                            <tr><th>전화번호</th><td colspan="3">${data['전화번호'] || data['phone'] || '-'}</td></tr>
-                            <tr><th>이메일</th><td colspan="3">${data['이메일'] || data['email'] || '-'}</td></tr>
-                            <tr><th>주소(주민)</th><td colspan="3">${(data['addr_reg_city'] || '') + ' ' + (data['addr_reg_detail'] || '')}</td></tr>
-                            <tr><th>주소(실거주)</th><td colspan="3">${(data['addr_actual_city'] || '') + ' ' + (data['addr_actual_detail'] || '')}</td></tr>
-                        </table>
-
-                        <h2>2. 소속 및 학력</h2>
-                        <table>
-                            <tr><th>근무처</th><td>${data['근무처'] || data['workplace'] || '-'}</td><th>직 위</th><td>${data['직위'] || data['work_position'] || '-'}</td></tr>
-                            <tr><th>전공분야</th><td colspan="3">${data['전공'] || data['major'] || '-'}</td></tr>
-                            <tr><th>자격‧면허</th><td colspan="3">${(data['자격‧면허증'] || data['licenses'] || '-').replace(/\n/g, '<br>')}</td></tr>
-                        </table>
-                        
-                        <h2>3. 평가수행 관련</h2>
-                        <table>
-                            <tr><th>평가가능횟수</th><td>주 ${data['eval_freq'] || '-'}회</td><th>운전수행</th><td>${data['driving'] || '-'}</td></tr>
-                            <tr><th>타지역수행</th><td colspan="3">${data['other_region'] || '-'}</td></tr>
-                        </table>
-                    </div>
-
-                    <!-- Page 2: 자기소개 및 동의 -->
-                    <div class="page">
-                        <h2>4. 지원동기 및 포부</h2>
-                        <div style="border:1px solid #333; padding:15px; min-height:200px; font-size:13px; white-space:pre-wrap;">${data['self_intro'] || '-'}</div>
-
-                        <h2>5. 개인정보 수집·이용 동의서</h2>
-                        <div class="consent-box">
-                            <p>국민건강보험공단은 장기요양기관 평가업무 수행과 관련하여 아래와 같이 개인정보를 수집·이용하고자 합니다.</p>
-                            <p>1. 개인정보 수집·이용 내역: 성명, 성별, 생년월일, 연락처, 주소, 자격사항 등<br>
-                            2. 보유 및 이용기간: 선발 평가 종료 시까지</p>
-                            <p>본인은 공단이 본인의 개인정보 및 고유식별정보를 처리하는 것에 동의하며, 부동의 시 선발이 어려울 수 있음을 확인하였습니다.</p>
-                            <p style="margin-top:20px;">[동의 여부]<br>
-                            - 개인정보 수집 이용 동의: ${data['consent_1'] || '예'}<br>
-                            - 고유식별정보 처리 동의: ${data['consent_2'] || '예'}<br>
-                            - 불이익 안내 확인: ${data['consent_3'] || '예'}</p>
-                        </div>
-
-                        <div class="signature-area">
-                            <p>2026년 10월 31일</p>
-                            <p style="margin-top:40px;">지원자: <strong>${data['성명'] || data['name'] || ''}</strong> (서명) 
-                                ${row[row.length-1].startsWith('data:image/') ? `<img src="${row[row.length-1]}" class="signature-img">` : ''}
-                            </p>
-                            <p style="margin-top:60px; text-align:center; font-size:20px; font-weight:bold;">국민건강보험공단 이사장 귀하</p>
-                        </div>
-                    </div>
-
-                    <script>
-                        window.onload = () => {
-                            setTimeout(() => { window.print(); }, 500);
-                        };
-                    </script>
-                </body>
-                </html>
-                `;
+                const html = [
+                    '<html>',
+                    '<head>',
+                    '    <title>' + (v(2) || '지원자') + '_지원서_출력</title>',
+                    '    <style>',
+                    '        @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap");',
+                    '        body { font-family: "Noto+Sans+KR", sans-serif; line-height: 1.4; color: #111; padding: 0; margin: 0; font-size: 13px; background: #fff; }',
+                    '        .page { width: 210mm; padding: 20mm; margin: 0 auto; box-sizing: border-box; background: white; }',
+                    '        .page-break { page-break-before: always; }',
+                    '        h1 { text-align: center; font-size: 24px; text-decoration: underline; margin-bottom: 20px; }',
+                    '        h2 { font-size: 16px; border-left: 5px solid #333; padding-left: 10px; margin-top: 20px; margin-bottom: 10px; background: #f8fafc; }',
+                    '        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }',
+                    '        th, td { border: 1px solid #333; padding: 6px 8px; font-size: 12px; word-break: break-all; }',
+                    '        th { background: #f1f5f9; width: 20%; text-align: center; font-weight: 700; }',
+                    '        .signature-area { text-align: right; margin-top: 30px; font-size: 16px; position: relative; }',
+                    '        .signature-img { max-height: 80px; display: block; margin: 5px 0 0 auto; opacity: 0.9; }',
+                    '        .consent-box { border: 1px solid #333; padding: 15px; font-size: 12px; line-height: 1.6; margin-bottom: 20px; }',
+                    '        @media print {',
+                    '            body { margin: 0; padding: 0; }',
+                    '            .page { width: 100%; margin: 0; border: none; padding: 15mm; }',
+                    '            .page-break { page-break-before: always; display: block; clear: both; }',
+                    '        }',
+                    '    </style>',
+                    '</head>',
+                    '<body>',
+                    '    <div class="page">',
+                    '        <h1>장기요양기관 외부평가자 지원서</h1>',
+                    '        <h2>1. 인적 사항</h2>',
+                    '        <table>',
+                    '            <tr><th>지원자격</th><td colspan="3">' + v(1) + '</td></tr>',
+                    '            <tr><th>성 명</th><td>' + v(2) + '</td><th>성 별</th><td>' + v(3) + '</td></tr>',
+                    '            <tr><th>생년월일</th><td>' + v(4) + '</td><th>연 령</th><td>만 ' + v(5) + '세</td></tr>',
+                    '            <tr><th>전화번호</th><td colspan="3">' + v(10) + '</td></tr>',
+                    '            <tr><th>이메일</th><td colspan="3">' + v(11) + '</td></tr>',
+                    '            <tr><th>주소(주민)</th><td colspan="3">' + v(6) + ' ' + v(7) + '</td></tr>',
+                    '            <tr><th>주소(실거주)</th><td colspan="3">' + v(8) + ' ' + v(9) + '</td></tr>',
+                    '        </table>',
+                    '        <h2>2. 소속 및 학력</h2>',
+                    '        <table>',
+                    '            <tr><th>근무처</th><td>' + v(12) + '</td><th>직 위</th><td>' + v(13) + '</td></tr>',
+                    '            <tr><th>전공분야</th><td colspan="3">' + v(16) + '</td></tr>',
+                    '            <tr><th>자격‧면허</th><td colspan="3">' + (v(17) ? v(17).replace(/\n/g, '<br>') : '') + '</td></tr>',
+                    '        </table>',
+                    '        <h2>3. 근무경력</h2>',
+                    '        <table>',
+                    '            <tr><th style="width: 25%;">기관명</th><th style="width: 25%;">직위 및 직종</th><th style="width: 30%;">재직기간</th><th style="width: 20%;">비고</th></tr>',
+                    '            <tr><td>' + v(18) + '</td><td>' + v(19) + '</td><td style="text-align:center;">' + vDate(20, 21) + '</td><td>' + v(22) + '</td></tr>',
+                    '            <tr><td>' + v(23) + '</td><td>' + v(24) + '</td><td style="text-align:center;">' + vDate(25, 26) + '</td><td>' + v(27) + '</td></tr>',
+                    '            <tr><td>' + v(28) + '</td><td>' + v(29) + '</td><td style="text-align:center;">' + vDate(30, 31) + '</td><td>' + v(32) + '</td></tr>',
+                    '            <tr><td>' + v(33) + '</td><td>' + v(34) + '</td><td style="text-align:center;">' + vDate(35, 36) + '</td><td>' + v(37) + '</td></tr>',
+                    '        </table>',
+                    '        <h2>4. 연구실적 및 경력</h2>',
+                    '        <table>',
+                    '            <tr><th style="width: 30%;">기간</th><th>내용</th></tr>',
+                    '            <tr><td style="text-align:center;">' + vDate(43, 44) + '</td><td>' + v(45) + '</td></tr>',
+                    '            <tr><td style="text-align:center;">' + vDate(46, 47) + '</td><td>' + v(48) + '</td></tr>',
+                    '            <tr><td style="text-align:center;">' + vDate(49, 50) + '</td><td>' + v(51) + '</td></tr>',
+                    '        </table>',
+                    '        <h2>5. 평가수행 관련</h2>',
+                    '        <table>',
+                    '            <tr><th>평가가능횟수</th><td>주 ' + v(55) + '회</td><th>운전수행</th><td>' + v(56) + '</td></tr>',
+                    '            <tr><th>타지역수행</th><td colspan="3">' + v(57) + '</td></tr>',
+                    '        </table>',
+                    '    </div>',
+                    '    <div class="page page-break">',
+                    '        <h2>6. 지원동기 및 포부</h2>',
+                    '        <div style="border:1px solid #333; padding:15px; min-height:150px; font-size:12px; white-space:pre-wrap; margin-bottom:20px;">' + v(58) + '</div>',
+                    '        <h2>7. 개인정보 수집·이용 동의서</h2>',
+                    '        <div class="consent-box">',
+                    '            <p>국민건강보험공단은 장기요양기관 평가업무 수행과 관련하여 아래와 같이 개인정보를 수집·이용하고자 합니다.</p>',
+                    '            <p>1. 개인정보 수집·이용 내역: 성명, 성별, 생년월일, 연락처, 주소, 자격사항 등<br>',
+                    '            2. 보유 및 이용기간: 선발 평가 종료 시까지</p>',
+                    '            <p>본인은 공단이 본인의 개인정보 및 고유식별정보를 처리하는 것에 동의하며, 부동의 시 선발이 어려울 수 있음을 확인하였습니다.</p>',
+                    '            <p style="margin-top:20px;">[동의 여부]<br>',
+                    '            - 개인정보 수집 이용 동의: ' + v(59) + '<br>',
+                    '            - 고유식별정보 처리 동의: ' + v(60) + '<br>',
+                    '            - 불이익 안내 확인: ' + v(61) + '</p>',
+                    '        </div>',
+                    '        <div class="signature-area">',
+                    '            <p>' + submitDate + '</p>',
+                    '            <div style="margin-top:30px;">',
+                    '                지원자: <strong>' + v(2) + '</strong> (서명)',
+                    '                ' + signatureHtml,
+                    '            </div>',
+                    '            <p style="margin-top:50px; text-align:center; font-size:20px; font-weight:bold;">국민건강보험공단 이사장 귀하</p>',
+                    '        </div>',
+                    '    </div>',
+                    '    <script>',
+                    '        window.onload = () => {',
+                    '            setTimeout(() => { window.print(); }, 500);',
+                    '        };',
+                    '    <\/script>',
+                    '</body>',
+                    '</html>'
+                ].join('\n');
 
                 printWin.document.write(html);
                 printWin.document.close();
